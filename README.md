@@ -1,24 +1,7 @@
 # vue-form-validation
 
-## Project setup
-```
-npm install
-```
+> 表單驗證練習 
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## 參考資料 
+ - https://developer.mozilla.org/zh-TW/docs/Web/CSS/CSS_Grid_Layout/Basic_Concepts_of_Grid_Layout
+ - https://www.npmjs.com/package/async-validator
