@@ -4,10 +4,12 @@
             {{title}}
         </div>
         <div class="form-body">
-            <div class="item" :key="n" v-for="n in 10">
-                <div class="cell-title">{{String.fromCharCode(64+n)}}</div>
+            <div class="item" :key="index" v-for="(element,index) in Object.keys(model)">
+                <div class="cell-title">{{element}}</div>
                 <div class="cell-value">
-                    <input class="input" type="text" v-model="value[n]">
+                    <!-- @change is equals to @blur / @input trigger as value changing -->
+                    <input class="form-control" type="text" v-model="model[element]" @input="validate(element)">
+                    <p v-if="errors[element]">{{errors[element]}}</p>
                 </div>
             </div>
         </div>
@@ -15,83 +17,80 @@
 </template>
 
 <script>
-    import Schema from 'async-validator';
+    import AsyncValidator from 'async-validator';
+
+    const rules = {
+        name: {
+            type: "string",
+            required: true,
+        },
+        email: {
+            type: "email",
+            required: true,
+        }
+    };
 
     export default {
         name: "GridForm",
         props: {
             width: {
                 type: String,
-                default: '70%'
+                default: '90%'
             },
             title: {
                 type: String,
                 default: '表格 - 修改密碼'
             }
         },
+        methods: {
+            validate(field) { // validate is on form-item
+
+                console.log(field + ' change');
+
+                const validator = new AsyncValidator({[field]: rules[field]});
+
+                // you need validate all fields that registered
+                validator.validate(
+                    {[field]: this.model[field]},
+                    {firstFields: true}, // when field generates an error, no more validation
+                    (errors) => {
+                        // this.validateState = !errors ? 'success' : 'error';
+                        // this.validateMessage = errors ? errors[0].message : '';
+
+                        // something after validate
+                        // callback(this.validateMessage, invalidFields);
+
+                        if (errors) {
+                            // validation failed, errors is an array of all errors
+                            // fields is an object keyed by field name with an array of
+                            // errors per field
+
+                            const errMsg = errors.reduce((pre, curr) => pre + curr.message, '');
+                            console.log('errMsg=', errMsg);
+                            this.errors[field] = errMsg;
+                            console.log('this.errors=', this.errors);
+
+                        } else {
+                            this.errors[field] = undefined;
+                        }
+                        // validation passed
+                    });
+            },
+        },
+        updated() {
+
+            console.log('updated !!');
+        },
         data() {
 
-            const descriptor = {
-                name: {
-                    type: "string",
-                    required: true,
-                    validator: (rule, value) => value === 'muji',
-                },
-                age: {
-                    type: "number",
-                    asyncValidator: (rule, value) => {
-                        return new Promise((resolve, reject) => {
-                            if (value < 18) {
-                                reject("too young");  // reject with error message
-                            } else {
-                                resolve();
-                            }
-                        });
-                    }
-                }
-            };
-
-            const handleErrors = (errors, fields) => {
-
-                console.error(errors);
-                console.error(fields);
-            };
-
-            const validator = new Schema(descriptor);
-
-            // watch the value change and validate again
-            validator.validate({name: "muji"}, (errors, fields) => {
-                if (errors) {
-                    // validation failed, errors is an array of all errors
-                    // fields is an object keyed by field name with an array of
-                    // errors per field
-                    return handleErrors(errors, fields);
-                }
-                // validation passed
-            });
-
-            // PROMISE USAGE
-            validator.validate({name: "muji", age: 16})
-                .then(() => {
-                    // validation passed or without error message
-                })
-                .catch(({errors, fields}) => {
-                    return handleErrors(errors, fields);
-                });
-
             return {
-                value: [
-                    '',
-                    '',
-                    '',
-                    '',
-                    '',
-                    '',
-                    '',
-                    '',
-                    '',
-                    '',
-                ]
+                errors: {},
+                model: {
+                    name: '談得賽',
+                    company: 'WHO',
+                    from: '非洲',
+                    email: 'ttt@kkbox.com'
+                }
             }
         }
     }
@@ -100,7 +99,7 @@
 <style scoped>
 
     .form-title {
-        height: 30px;
+        height: 50px;
         padding: 10px;
         display: flex;
         align-items: center;
@@ -128,7 +127,7 @@
         background-color: #00ffff;
         padding: 10px;
         height: 100%;
-        width: 60px;
+        min-width: 80px;
         text-align: right;
     }
 
@@ -137,7 +136,4 @@
         height: 100%;
     }
 
-    .input {
-        width: 100%;
-    }
 </style>

@@ -1,6 +1,8 @@
 <template>
     <div id="app">
-        <GridForm/>
+        <div style="margin: 20px">
+            <GridForm/>
+        </div>
     </div>
 </template>
 
